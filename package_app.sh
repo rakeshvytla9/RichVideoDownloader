@@ -38,7 +38,7 @@ for tool in "${TOOLS[@]}"; do
         
         # Pull in dylibs for each native tool
         echo "   * Bundling dependencies for $tool..."
-        dylibbundler -od -b -x "$APP_BUNDLE/Contents/Resources/bin/$tool" -d "$APP_BUNDLE/Contents/Frameworks/" -p "@executable_path/../../Frameworks/"
+        dylibbundler -of -b -x "$APP_BUNDLE/Contents/Resources/bin/$tool" -d "$APP_BUNDLE/Contents/Frameworks/" -p "@executable_path/../../Frameworks/"
     else
         echo "   ! Warning: $tool not found in PATH, skipping bundling."
     fi

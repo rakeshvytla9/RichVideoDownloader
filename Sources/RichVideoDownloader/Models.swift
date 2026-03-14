@@ -6,7 +6,7 @@ enum FormatSelectionID {
     static let noneAudio = "NONE_AUDIO"
 }
 
-public enum DownloadState: String, Codable, Equatable, CaseIterable {
+public enum DownloadState: String, Codable, Equatable, CaseIterable, Sendable {
     case queued = "Queued"
     case downloading = "Downloading"
     case paused = "Paused"
@@ -15,7 +15,7 @@ public enum DownloadState: String, Codable, Equatable, CaseIterable {
     case cancelled = "Cancelled"
 }
 
-public enum DownloadCategory: String, Codable, Equatable, CaseIterable, Identifiable {
+public enum DownloadCategory: String, Codable, Equatable, CaseIterable, Identifiable, Sendable {
     case all = "All"
     case video = "Video"
     case audio = "Audio"
@@ -39,7 +39,7 @@ public enum DownloadCategory: String, Codable, Equatable, CaseIterable, Identifi
     }
 }
 
-enum BrowserCookieSource: String, CaseIterable, Codable, Identifiable {
+enum BrowserCookieSource: String, CaseIterable, Codable, Identifiable, Sendable {
     case none = "None"
     case chrome = "Chrome"
     case safari = "Safari"
@@ -67,7 +67,7 @@ enum BrowserCookieSource: String, CaseIterable, Codable, Identifiable {
     }
 }
 
-struct VideoFormat: Identifiable, Hashable, Codable {
+struct VideoFormat: Identifiable, Hashable, Codable, Sendable {
     let id: String
     let displayName: String
     let ext: String
@@ -77,7 +77,7 @@ struct VideoFormat: Identifiable, Hashable, Codable {
     let sizeBytes: Int64?
 }
 
-struct VideoInfo: Codable {
+struct VideoInfo: Codable, Sendable {
     let title: String
     let uploader: String?
     let durationSeconds: Int?
@@ -90,7 +90,7 @@ struct VideoInfo: Codable {
     var captureSource: String? = nil
 }
 
-struct DownloadOptions: Hashable, Codable {
+struct DownloadOptions: Hashable, Codable, Sendable {
     var audioOnly: Bool
     var embedSubtitles: Bool
     var writeMetadata: Bool
@@ -106,13 +106,13 @@ struct DownloadOptions: Hashable, Codable {
     var customHeaders: [String]
 }
 
-struct DownloadProgressUpdate {
+struct DownloadProgressUpdate: Sendable {
     let progressFraction: Double?
     let speedText: String?
     let etaText: String?
 }
 
-struct DownloadItem: Identifiable, Hashable, Codable {
+struct DownloadItem: Identifiable, Hashable, Codable, Sendable {
     let id: UUID
     let sourceURL: String
     var title: String

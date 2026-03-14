@@ -24,11 +24,7 @@ final class DownloaderViewModel: ObservableObject {
     @Published var isAnalyzing = false
     @Published var analysisError: String?
 
-    @Published var queue: [DownloadItem] = [] {
-        didSet {
-            saveHistory()
-        }
-    }
+    @Published var queue: [DownloadItem] = []
     @Published var logs: [String] = []
     @Published var captureBridgeStatus: String = "Starting..."
     @Published var capturedMedia: [CapturedMediaItem] = []
@@ -146,15 +142,22 @@ final class DownloaderViewModel: ObservableObject {
         await refreshToolchain()
     }
     
-    private func saveHistory() {
-        // We only save relevant parts. Currently saving the whole queue.
-        // To avoid saving heavy objects like VideoFormat frequently, we could optimize, 
-        // but for a dozen items, JSON is fast enough.
-        do {
-            let data = try JSONEncoder().encode(queue)
-            try data.write(to: persistenceURL)
-        } catch {
-            print("[Persistence] Save failed: \(error)")
+    private var lastSaveTime: Date = .distantPast
+    
+    private func saveHistory(force: Bool = false) {
+        let now = Date()
+        // Debounce: Only save if forced or if > 2 seconds since last save
+        guard force || now.timeIntervalSince(lastSaveTime) > 2.0 else { return }
+        lastSaveTime = now
+
+        let itemsToSave = self.queue
+        Task.detached(priority: .background) {
+            do {
+                let data = try JSONEncoder().encode(itemsToSave)
+                try data.write(to: self.persistenceURL)
+            } catch {
+                print("[Persistence] Save failed: \(error)")
+            }
         }
     }
     
@@ -292,6 +295,7 @@ final class DownloaderViewModel: ObservableObject {
 
         queue.append(item)
         appendLog("Queued: \(item.title)")
+        saveHistory(force: true)
 
         if isQueueRunning {
             startQueuedDownloadsIfNeeded()
@@ -331,6 +335,7 @@ final class DownloaderViewModel: ObservableObject {
 
         queue.append(item)
         appendLog("Direct URL queued: \(item.title)")
+        saveHistory(force: true)
 
         if isQueueRunning {
             startQueuedDownloadsIfNeeded()
@@ -428,6 +433,7 @@ final class DownloaderViewModel: ObservableObject {
                 item.statusText = "Paused by user"
                 item.updatedAt = Date()
             }
+            saveHistory(force: true)
             process.terminate()
             if downloadEngines[id] == .telegramExtension {
                 captureBridgeServer.cancelTelegramDownload(id: id.uuidString)
@@ -453,6 +459,7 @@ final class DownloaderViewModel: ObservableObject {
                 item.updatedAt = Date()
             }
         }
+        saveHistory(force: true)
 
         appendLog("Resumed: \(titleFor(id: id))")
 
@@ -475,6 +482,7 @@ final class DownloaderViewModel: ObservableObject {
             item.statusText = "Cancelled"
             item.updatedAt = Date()
         }
+        saveHistory(force: true)
 
         appendLog("Cancelled: \(titleFor(id: id))")
         startQueuedDownloadsIfNeeded()
@@ -491,6 +499,7 @@ final class DownloaderViewModel: ObservableObject {
             item.fallbackRetryCount = 0
             item.updatedAt = Date()
         }
+        saveHistory(force: true)
 
         appendLog("Retry queued: \(titleFor(id: id))")
 
@@ -511,10 +520,12 @@ final class DownloaderViewModel: ObservableObject {
         downloadStartTimes[id] = nil
         detectedOutputPaths[id] = nil
         queue.removeAll { $0.id == id }
+        saveHistory(force: true)
     }
 
     func clearCompleted() {
         queue.removeAll { $0.state == .completed || $0.state == .cancelled }
+        saveHistory(force: true)
     }
 
     func clearQueue() {
@@ -531,6 +542,7 @@ final class DownloaderViewModel: ObservableObject {
         detectedOutputPaths.removeAll()
         queue.removeAll()
         appendLog("Removed all queue items.")
+        saveHistory(force: true)
     }
 
     private func startQueuedDownloadsIfNeeded() {
@@ -821,6 +833,7 @@ final class DownloaderViewModel: ObservableObject {
             item.statusText = "Downloading"
             item.updatedAt = Date()
         }
+        saveHistory(force: false)
     }
 
     private func handleLogLine(id: UUID, line: String) {
@@ -909,6 +922,7 @@ final class DownloaderViewModel: ObservableObject {
                     queue[index].forcedFormatExpression = nil
                     queue[index].updatedAt = Date()
                     appendLog("Completed: \(queue[index].title)")
+                    saveHistory(force: true)
                 }
             } else {
                 queue[index].state = .failed
