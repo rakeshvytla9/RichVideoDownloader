@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Comprehensive script to package RichVideoDownloader as a portable macOS .app
+# Ultra-Portable script to package RichVideoDownloader as a 100% Self-Contained macOS .app
 set -e
 
 APP_NAME="RichVideoDownloader"
@@ -16,19 +16,30 @@ echo "📁 Creating app bundle structure..."
 rm -rf "$APP_BUNDLE"
 mkdir -p "$APP_BUNDLE/Contents/MacOS"
 mkdir -p "$APP_BUNDLE/Contents/Resources/bin"
+mkdir -p "$APP_BUNDLE/Contents/Frameworks"
 
-echo "⚙️ Copying binary..."
+echo "⚙️ Copying main binary..."
 cp "$BUILD_DIR/$APP_NAME" "$APP_BUNDLE/Contents/MacOS/"
 
 echo "📦 Bundling toolchain (yt-dlp, ffmpeg, aria2c, etc.)..."
-TOOLS=("yt-dlp" "ffmpeg" "ffprobe" "aria2c" "dash-mpd-cli")
+# 1. Standalone yt-dlp (Universal macOS binary with local python)
+echo "   -> Downloading standalone yt-dlp_macos..."
+curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos -o "$APP_BUNDLE/Contents/Resources/bin/yt-dlp"
+chmod +x "$APP_BUNDLE/Contents/Resources/bin/yt-dlp"
+
+# 2. Native Binaries
+TOOLS=("ffmpeg" "ffprobe" "aria2c" "dash-mpd-cli")
 for tool in "${TOOLS[@]}"; do
     TOOL_PATH=$(which "$tool" || true)
     if [ -n "$TOOL_PATH" ]; then
         echo "   + Adding $tool from $TOOL_PATH"
         cp "$TOOL_PATH" "$APP_BUNDLE/Contents/Resources/bin/"
+        
+        # Pull in dylibs for each native tool
+        echo "   * Bundling dependencies for $tool..."
+        dylibbundler -od -b -x "$APP_BUNDLE/Contents/Resources/bin/$tool" -d "$APP_BUNDLE/Contents/Frameworks/" -p "@executable_path/../../Frameworks/"
     else
-        echo "   ! Warning: $tool not found in PATH, skipping bundling for this tool."
+        echo "   ! Warning: $tool not found in PATH, skipping bundling."
     fi
 done
 
@@ -47,11 +58,11 @@ cat <<EOF > "$APP_BUNDLE/Contents/Info.plist"
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>0.1.0</string>
+    <string>1.0.0</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>LSMinimumSystemVersion</key>
-    <string>14.0</string>
+    <string>12.0</string>
 </dict>
 </plist>
 EOF
@@ -75,7 +86,7 @@ if [ -f "$ICON_PATH" ]; then
     rm -rf "$ICONSET"
 fi
 
-echo "✅ Portable app bundle created at $APP_BUNDLE"
+echo "✅ Self-contained app bundle created at $APP_BUNDLE"
 
 read -p "🚀 Do you want to install $APP_NAME to your /Applications folder? (y/n) " -n 1 -r
 echo
@@ -83,7 +94,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "📂 Installing to /Applications..."
     rm -rf "/Applications/$APP_BUNDLE"
     cp -R "$APP_BUNDLE" "/Applications/"
-    echo "✨ Done! You can now launch $APP_NAME from your Applications folder or Spotlight."
+    echo "✨ Done! This app is now friend-ready. You can share the .app file directly."
 else
     echo "💡 You can find the app bundle in the current directory: $(pwd)/$APP_BUNDLE"
 fi

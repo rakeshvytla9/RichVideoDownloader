@@ -32,8 +32,9 @@ struct ContentView: View {
                 }
                 .padding(16)
             }
-            .frame(minWidth: 1100, minHeight: 820)
+            .frame(minWidth: 700, minHeight: 500)
         }
+        .frame(minWidth: 900, minHeight: 600)
         .task {
             await viewModel.bootstrap()
         }
