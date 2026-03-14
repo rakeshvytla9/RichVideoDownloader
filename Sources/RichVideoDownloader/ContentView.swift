@@ -205,39 +205,60 @@ struct ContentView: View {
                 }
 
                 if viewModel.useAria2 && viewModel.toolchain.aria2cPath != nil {
-                    HStack(spacing: 16) {
-                        Stepper("Connections: \(viewModel.aria2Connections)", value: $viewModel.aria2Connections, in: 1...32)
-                            .frame(width: 210)
-                        Stepper("Min split: \(viewModel.aria2MinSplitSizeMB) MB", value: $viewModel.aria2MinSplitSizeMB, in: 1...16)
-                            .frame(width: 210)
-                        Stepper("Timeout: \(viewModel.aria2TimeoutSeconds)s", value: $viewModel.aria2TimeoutSeconds, in: 5...120)
-                            .frame(width: 200)
+                    HStack(spacing: 24) {
+                        HStack(spacing: 8) {
+                            Text("Connections:")
+                                .font(.callout)
+                            Stepper("\(viewModel.aria2Connections)", value: $viewModel.aria2Connections, in: 1...32)
+                                .fixedSize()
+                        }
+                        
+                        HStack(spacing: 8) {
+                            Text("Min split:")
+                                .font(.callout)
+                            Stepper("\(viewModel.aria2MinSplitSizeMB) MB", value: $viewModel.aria2MinSplitSizeMB, in: 1...16)
+                                .fixedSize()
+                        }
+                        
+                        HStack(spacing: 8) {
+                            Text("Timeout:")
+                                .font(.callout)
+                            Stepper("\(viewModel.aria2TimeoutSeconds)s", value: $viewModel.aria2TimeoutSeconds, in: 5...120)
+                                .fixedSize()
+                        }
+                        
                         Spacer()
                     }
-                    .font(.callout)
                 }
 
-                HStack(spacing: 16) {
-                    Stepper(
-                        viewModel.speedLimitMBps == 0 ? "Global Speed Limit: None" : "Global Speed Limit: \(viewModel.speedLimitMBps) MB/s",
-                        value: Binding(get: { viewModel.speedLimitMBps }, set: { viewModel.speedLimitMBps = max(0, min(1000, $0)) }),
-                        in: 0...1000
-                    )
-                    .frame(maxWidth: 300)
+                HStack(spacing: 8) {
+                    Text("Global Speed Limit:")
+                        .font(.callout)
+                    Stepper(viewModel.speedLimitMBps == 0 ? "None" : "\(viewModel.speedLimitMBps) MB/s",
+                            value: Binding(get: { viewModel.speedLimitMBps }, set: { viewModel.speedLimitMBps = max(0, min(1000, $0)) }),
+                            in: 0...1000)
+                        .fixedSize()
+                        .font(.callout)
                     Spacer()
                 }
 
                 HStack(spacing: 12) {
-                    Picker("Cookies", selection: $viewModel.cookieSource) {
-                        ForEach(BrowserCookieSource.allCases) { browser in
-                            Text(browser.rawValue).tag(browser)
+                    HStack(spacing: 8) {
+                        Text("Cookies:")
+                            .font(.callout)
+                        Picker("", selection: $viewModel.cookieSource) {
+                            ForEach(BrowserCookieSource.allCases) { browser in
+                                Text(browser.rawValue).tag(browser)
+                            }
                         }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+                        .frame(width: 100)
                     }
-                    .pickerStyle(.menu)
-                    .frame(width: 180)
 
                     TextField("Referer override (optional)", text: $viewModel.refererHeader)
                         .textFieldStyle(.roundedBorder)
+                    
                     TextField("User-Agent override (optional)", text: $viewModel.userAgentHeader)
                         .textFieldStyle(.roundedBorder)
                 }

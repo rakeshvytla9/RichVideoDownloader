@@ -43,6 +43,9 @@ for tool in "${TOOLS[@]}"; do
     fi
 done
 
+echo "🎨 Bundling browser extension..."
+cp -R "Extensions/chrome" "$APP_BUNDLE/Contents/Resources/extension"
+
 echo "📝 Creating Info.plist..."
 cat <<EOF > "$APP_BUNDLE/Contents/Info.plist"
 <?xml version="1.0" encoding="UTF-8"?>
@@ -95,6 +98,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     rm -rf "/Applications/$APP_BUNDLE"
     cp -R "$APP_BUNDLE" "/Applications/"
     echo "✨ Done! This app is now friend-ready. You can share the .app file directly."
+    echo "📂 Note: The browser extension is located at /Applications/$APP_BUNDLE/Contents/Resources/extension"
 else
     echo "💡 You can find the app bundle in the current directory: $(pwd)/$APP_BUNDLE"
+    echo "📂 Note: The browser extension is located inside the bundle at $APP_BUNDLE/Contents/Resources/extension"
 fi
