@@ -7,7 +7,7 @@ APP_NAME="RichVideoDownloader"
 BUNDLE_ID="io.antigravity.RichVideoDownloader"
 BUILD_DIR=".build/release"
 APP_BUNDLE="$APP_NAME.app"
-ICON_PATH="/Users/rakeshmohan/.gemini/antigravity/brain/18200527-08ac-4555-b993-a42f2f870958/app_icon_vibrant_downloader_1773490050344.png"
+ICON_PATH="/Users/rakeshmohan/.gemini/antigravity/brain/18200527-08ac-4555-b993-a42f2f870958/app_icon_minimalist_kinetic_downloader_1773490551525.png"
 
 echo "🚀 Building $APP_NAME in Release mode..."
 swift build -c release
@@ -75,5 +75,15 @@ if [ -f "$ICON_PATH" ]; then
     rm -rf "$ICONSET"
 fi
 
-echo "✅ Portable app bundle created at $APP_NAME.app"
-echo "You can now find it in the current directory."
+echo "✅ Portable app bundle created at $APP_BUNDLE"
+
+read -p "🚀 Do you want to install $APP_NAME to your /Applications folder? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo "📂 Installing to /Applications..."
+    rm -rf "/Applications/$APP_BUNDLE"
+    cp -R "$APP_BUNDLE" "/Applications/"
+    echo "✨ Done! You can now launch $APP_NAME from your Applications folder or Spotlight."
+else
+    echo "💡 You can find the app bundle in the current directory: $(pwd)/$APP_BUNDLE"
+fi
