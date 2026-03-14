@@ -353,14 +353,17 @@ chrome.downloads.onCreated.addListener(async (downloadItem) => {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "PROXY_CHUNK") {
-    const { id, chunk, progress, isFinish } = message;
+    const { id, chunk, progress, isFinish, offset } = message;
     
     // chunk arrived as a plain Array from the injector
     const buffer = new Uint8Array(chunk);
     
     (async () => {
       try {
-        await fetch(`${BRIDGE_URL}/chunk?id=${id}`, {
+        let url = `${BRIDGE_URL}/chunk?id=${id}`;
+        if (offset !== undefined) url += `&offset=${offset}`;
+        
+        await fetch(url, {
           method: "POST",
           body: buffer
         });

@@ -244,10 +244,19 @@ final class CaptureBridgeServer: @unchecked Sendable {
         
         if route == "/chunk", let id = queries["id"] {
             if let handle = activeHandles[id] {
-                if #available(macOS 10.15.4, *) {
-                    _ = try? handle.seekToEnd()
+                if let offsetStr = queries["offset"], let offset = UInt64(offsetStr) {
+                    if #available(macOS 10.15.4, *) {
+                        try? handle.seek(toOffset: offset)
+                    } else {
+                        handle.seek(toFileOffset: offset)
+                    }
                 } else {
-                    handle.seekToEndOfFile()
+                    // Fallback to end
+                    if #available(macOS 10.15.4, *) {
+                        _ = try? handle.seekToEnd()
+                    } else {
+                        handle.seekToEndOfFile()
+                    }
                 }
                 handle.write(body)
             }

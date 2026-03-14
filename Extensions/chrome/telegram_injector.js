@@ -185,13 +185,14 @@
   // Listen for chunks coming back from the MAIN world
   window.addEventListener('message', (event) => {
     if (event.data?.type === 'RVD_MAIN_CHUNK') {
-      const { id, chunk, progress, isFinish } = event.data;
+      const { id, chunk, progress, isFinish, offset } = event.data;
       chrome.runtime.sendMessage({
         type: "PROXY_CHUNK",
         id, 
         chunk: Array.from(chunk), // CRITICAL: Convert to plain Array to avoid serialization loss
         progress, 
-        isFinish
+        isFinish,
+        offset
       }).catch(() => {});
     } else if (event.data?.type === 'RVD_MAIN_LOG') {
       chrome.runtime.sendMessage({
