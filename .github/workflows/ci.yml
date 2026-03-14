@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - "codex/**"
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: macos-15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Show tool versions
+        run: |
+          swift --version
+          node --version
+
+      - name: Build
+        run: swift build
+
+      - name: Test
+        run: swift test
+
+      - name: Validate Chrome extension worker
+        run: node --check Extensions/chrome/service_worker.js

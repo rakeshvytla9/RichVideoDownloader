@@ -1,0 +1,30 @@
+# System Files
+.DS_Store
+Thumbs.db
+
+# Build & Dependency Artifacts
+.build/
+.swiftpm/
+Packages/
+DerivedData/
+bin/
+obj/
+
+# Debugging & Logs
+*.log
+*.swp
+.gemini/
+.tmp-home/
+
+# Local Environment / Hidden 
+.project
+.vscode/
+.idea/
+
+# Download Artifacts (if stored in root)
+Downloads/
+output/
+*.mp4
+*.m4a
+*.mkv
+*.webm
