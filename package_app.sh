@@ -7,6 +7,7 @@ APP_NAME="RichVideoDownloader"
 BUNDLE_ID="io.antigravity.RichVideoDownloader"
 BUILD_DIR=".build/release"
 APP_BUNDLE="$APP_NAME.app"
+DIST_DIR="RichVideoDownloader_Distribution"
 ICON_PATH="/Users/rakeshmohan/.gemini/antigravity/brain/18200527-08ac-4555-b993-a42f2f870958/app_icon_minimalist_kinetic_downloader_1773490551525.png"
 
 echo "🚀 Building $APP_NAME in Release mode..."
@@ -91,15 +92,27 @@ fi
 
 echo "✅ Self-contained app bundle created at $APP_BUNDLE"
 
+echo "📂 Preparing Distribution Folder..."
+rm -rf "$DIST_DIR"
+mkdir -p "$DIST_DIR"
+cp -R "$APP_BUNDLE" "$DIST_DIR/"
+cp -R "Extensions/chrome" "$DIST_DIR/ChromeExtension"
+cp "Extensions/chrome/INSTALL_EXTENSION.txt" "$DIST_DIR/QuickStart.txt"
+
 read -p "🚀 Do you want to install $APP_NAME to your /Applications folder? (y/n) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "📂 Installing to /Applications..."
     rm -rf "/Applications/$APP_BUNDLE"
     cp -R "$APP_BUNDLE" "/Applications/"
-    echo "✨ Done! This app is now friend-ready. You can share the .app file directly."
-    echo "📂 Note: The browser extension is located at /Applications/$APP_BUNDLE/Contents/Resources/extension"
-else
-    echo "💡 You can find the app bundle in the current directory: $(pwd)/$APP_BUNDLE"
-    echo "📂 Note: The browser extension is located inside the bundle at $APP_BUNDLE/Contents/Resources/extension"
+    echo "✨ Done! The app is now in your Applications folder."
 fi
+
+echo "----------------------------------------------------------------"
+echo "🎁 FRIEND-READY BUNDLE PREPARED!"
+echo "Location: $(pwd)/$DIST_DIR"
+echo "Instructions:"
+echo "1. Zip the '$DIST_DIR' folder."
+echo "2. Send the zip to your friend."
+echo "3. They will see the App and a separate 'ChromeExtension' folder."
+echo "----------------------------------------------------------------"

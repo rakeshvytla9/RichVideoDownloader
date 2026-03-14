@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "RichVideoDownloader Capture Bridge",
+  "version": "0.1.0",
+  "description": "Sniffs media requests and forwards them to the local RichVideoDownloader app.",
+  "permissions": [
+    "webRequest",
+    "tabs",
+    "storage",
+    "downloads",
+    "cookies",
+    "notifications",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "http://127.0.0.1:38123/*"
+  ],
+  "background": {
+    "service_worker": "service_worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://web.telegram.org/*",
+        "https://webk.telegram.org/*",
+        "https://webz.telegram.org/*"
+      ],
+      "js": ["telegram_injector.js"],
+      "world": "ISOLATED"
+    },
+    {
+      "matches": [
+        "https://web.telegram.org/*",
+        "https://webk.telegram.org/*",
+        "https://webz.telegram.org/*"
+      ],
+      "js": ["main_world_bridge.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    }
+  ]
+}

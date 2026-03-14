@@ -1,0 +1,11 @@
+HOW TO INSTALL THE BROWSER EXTENSION
+------------------------------------
+
+1. Open your Chromium-based browser (Chrome, Brave, Edge, etc.).
+2. Go to the Extensions page (type chrome://extensions in the address bar).
+3. Turn on "Developer mode" in the top-right corner.
+4. Click "Load unpacked" in the top-left corner.
+5. In the file picker, find the folder named 'ChromeExtension' inside this zip.
+6. Click "Select" or "Open".
+
+You're all set! Now you can download videos with one click from Telegram and other sites.
