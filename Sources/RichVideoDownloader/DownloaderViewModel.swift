@@ -24,7 +24,11 @@ final class DownloaderViewModel: ObservableObject {
     @Published var isAnalyzing = false
     @Published var analysisError: String?
 
-    @Published var queue: [DownloadItem] = []
+    @Published var queue: [DownloadItem] = [] {
+        didSet {
+            saveHistory()
+        }
+    }
     @Published var logs: [String] = []
     @Published var captureBridgeStatus: String = "Starting..."
     @Published var capturedMedia: [CapturedMediaItem] = []
@@ -129,9 +133,52 @@ final class DownloaderViewModel: ObservableObject {
         return true
     }
 
+    private let persistenceURL: URL = {
+        let paths = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+        let appSupport = paths[0].appendingPathComponent("RichVideoDownloader")
+        try? FileManager.default.createDirectory(at: appSupport, withIntermediateDirectories: true)
+        return appSupport.appendingPathComponent("history.json")
+    }()
+
     func bootstrap() async {
+        loadHistory()
         startCaptureBridge()
         await refreshToolchain()
+    }
+    
+    private func saveHistory() {
+        // We only save relevant parts. Currently saving the whole queue.
+        // To avoid saving heavy objects like VideoFormat frequently, we could optimize, 
+        // but for a dozen items, JSON is fast enough.
+        do {
+            let data = try JSONEncoder().encode(queue)
+            try data.write(to: persistenceURL)
+        } catch {
+            print("[Persistence] Save failed: \(error)")
+        }
+    }
+    
+    private func loadHistory() {
+        guard FileManager.default.fileExists(atPath: persistenceURL.path) else { return }
+        do {
+            let data = try Data(contentsOf: persistenceURL)
+            let decoded = try JSONDecoder().decode([DownloadItem].self, from: data)
+            
+            // Clean up state: reset downloading to paused or queued if they were interrupted
+            var restored = decoded
+            for i in 0..<restored.count {
+                if restored[i].state == .downloading {
+                    restored[i].state = .queued
+                    restored[i].statusText = "Interrupted"
+                }
+            }
+            
+            self.queue = restored
+            appendLog("Restored \(queue.count) items from history.")
+        } catch {
+            print("[Persistence] Load failed: \(error)")
+            appendLog("Failed to load history: \(error.localizedDescription)")
+        }
     }
 
     func refreshToolchain() async {

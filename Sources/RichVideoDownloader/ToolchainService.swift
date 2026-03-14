@@ -36,13 +36,21 @@ struct ToolchainStatus {
 
 final class ToolchainService {
     private let fileManager = FileManager.default
-    private let defaultSearchRoots = [
-        (NSHomeDirectory() as NSString).appendingPathComponent(".local/yt-dlp-venv/bin"),
-        "/opt/homebrew/bin",
-        "/usr/local/bin",
-        "/usr/bin",
-        "/bin"
-    ]
+    private var defaultSearchRoots: [String] {
+        var roots = [
+            (NSHomeDirectory() as NSString).appendingPathComponent(".local/yt-dlp-venv/bin"),
+            "/opt/homebrew/bin",
+            "/usr/local/bin",
+            "/usr/bin",
+            "/bin"
+        ]
+        
+        if let bundledBin = Bundle.main.resourceURL?.appendingPathComponent("bin").path {
+            roots.insert(bundledBin, at: 0)
+        }
+        
+        return roots
+    }
 
     func detect() -> ToolchainStatus {
         let ytDlp = resolve(binary: "yt-dlp")

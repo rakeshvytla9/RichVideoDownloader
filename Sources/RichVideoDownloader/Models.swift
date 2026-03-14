@@ -67,7 +67,7 @@ enum BrowserCookieSource: String, CaseIterable, Codable, Identifiable {
     }
 }
 
-struct VideoFormat: Identifiable, Hashable {
+struct VideoFormat: Identifiable, Hashable, Codable {
     let id: String
     let displayName: String
     let ext: String
@@ -77,7 +77,7 @@ struct VideoFormat: Identifiable, Hashable {
     let sizeBytes: Int64?
 }
 
-struct VideoInfo {
+struct VideoInfo: Codable {
     let title: String
     let uploader: String?
     let durationSeconds: Int?
@@ -90,7 +90,7 @@ struct VideoInfo {
     var captureSource: String? = nil
 }
 
-struct DownloadOptions: Hashable {
+struct DownloadOptions: Hashable, Codable {
     var audioOnly: Bool
     var embedSubtitles: Bool
     var writeMetadata: Bool
@@ -112,7 +112,7 @@ struct DownloadProgressUpdate {
     let etaText: String?
 }
 
-struct DownloadItem: Identifiable, Hashable {
+struct DownloadItem: Identifiable, Hashable, Codable {
     let id: UUID
     let sourceURL: String
     var title: String
